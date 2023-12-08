@@ -52,8 +52,8 @@ num_clases = 4
 cantidad_datos_entenamiento = [4000, 4000, 4000, 4000]
 cantidad_datos_pruebas = [2000, 2000, 2000, 2000]
 
+##Carga de los datos
 imagenes, probabilidades = cargarDatos("dataset/tratado/train/", num_clases, cantidad_datos_entenamiento, width, height)
-
 print(imagenes)
 
 model = Sequential()
@@ -64,35 +64,42 @@ model.add(InputLayer(input_shape=(pixeles,)))
 # Re armar la imagen
 model.add(Reshape(img_shape))
 
-# Capas convolucionales más profundas
-model.add(Conv2D(kernel_size=3, strides=2, filters=32, padding="same", activation="relu", name="conv1_1"))
-model.add(Conv2D(kernel_size=3, strides=2,filters=32, padding="same", activation="relu", name="conv1_2"))
+# Capas convolucionales
+model.add(Conv2D(kernel_size=10, strides=2, filters=22,
+                 padding="same", activation="relu", name="capa_1"))
 model.add(MaxPool2D(pool_size=2, strides=2))
 
-model.add(Conv2D(kernel_size=3, strides=2, filters=64, padding="same", activation="relu", name="conv2_1"))
-model.add(Conv2D(kernel_size=3, strides=2, filters=64, padding="same", activation="relu", name="conv2_2"))
+model.add(Conv2D(kernel_size=10, strides=2, filters=28,
+                 padding="same", activation="relu", name="capa_2"))
 model.add(MaxPool2D(pool_size=2, strides=2))
 
-# Capas completamente conectadas
+model.add(Conv2D(kernel_size=10, strides=2, filters=32,
+                 padding="same", activation="relu", name="capa_3"))
+model.add(MaxPool2D(pool_size=2, strides=2))
+
+# Aplanamiento
 model.add(Flatten())
 model.add(Dense(128, activation="relu"))
 
 # Capa de salida
 model.add(Dense(num_clases, activation="softmax"))
 
+# Traducir de keras a tensorflow
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
-model.fit(x=imagenes, y=probabilidades, epochs=20, batch_size=60)
 
+model.fit(x=imagenes, y=probabilidades, epochs=40, batch_size=70)
+# Pruebas
 imagenes_prueba, probabilidades_prueba = cargarDatos("dataset/tratado/test/", num_clases, cantidad_datos_pruebas, width, height)
 resultados = model.evaluate(x=imagenes_prueba, y=probabilidades_prueba)
 print("METRIC NAMES", model.metrics_names)
 print("RESULTADOS", resultados)
 
 # Guardar el modelo
-ruta = "models/model_d.h5"
+ruta = "models/model_c.h5"
 model.save(ruta)
 
 # Estructura de la red
+
 model.summary()
 
 metricResult = model.evaluate(x=imagenes, y=probabilidades)
